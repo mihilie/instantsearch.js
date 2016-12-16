@@ -1,6 +1,12 @@
-This example shows how to build an autocomplete with react-instantsearch
+This example shows how to use an external autocomplete component with react-instantsearch
+It uses [react-autosuggest](https://github.com/moroshko/react-autosuggest) as the autocomplete external component.
 
-To start the example: 
+You will find two use cases:
+
+* How to build an autocomplete displaying hits and facet values from the same index.
+* How to build an autocomplete displaying hits from different indices
+
+To start the example:
 
 * npm install
 * npm start

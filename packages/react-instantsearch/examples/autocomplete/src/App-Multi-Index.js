@@ -11,6 +11,8 @@ import 'react-instantsearch-theme-algolia/style.css';
 class App extends Component {
   constructor(props) {
     super(props);
+    this.onProps = this.onProps.bind(this);
+    this.onSearchStateChange = this.onSearchStateChange.bind(this);
     this.state = {searchState: {}, hits: {}, query: ''};
   }
 
@@ -18,6 +20,12 @@ class App extends Component {
     this.setState({searchState: {...this.state.searchState, ...searchState}});
   }
 
+  /*
+  We need this function to gather all the data coming from several <InstantSearch/> indices.
+  In this example we are using the `indexName` to namespace those data to avoid erasing them
+  each time an instance is updated. You can choose to use any namespace of your choice, if the
+  `indexName` is not a differentiator.
+   */
   onProps(props) {
     this.setState({hits: {...this.state.hits, [props.indexName]: props.hits}, query: props.query});
   }
@@ -33,11 +41,13 @@ class App extends Component {
   render() {
     return (
       <div>
-        <FirstResults onProps={this.onProps.bind(this)}
+        <FirstResults onProps={this.onProps}
                       searchState={this.state.searchState}
-                      onSearchStateChange={this.onSearchStateChange.bind(this)}/>
-        <SecondResults onProps={this.onProps.bind(this)} searchState={this.state.searchState}
-                       onSearchStateChange={this.onSearchStateChange.bind(this)}/>
+                      onSearchStateChange={this.onSearchStateChange}/>
+        <SecondResults onProps={this.onProps} searchState={this.state.searchState}
+                       onSearchStateChange={this.onSearchStateChange}/>
+        {/* The AutoSuggest component is inside an <InstantSearch/> instance only to
+        take advantage of the <Highlight/> widget */}
         <InstantSearch
           appId="latency"
           apiKey="6be0576ff61c053d5f9a3225e2a90f76"
@@ -153,6 +163,7 @@ const connectAutoComplete = createConnector({
 });
 
 class AutoComplete extends React.Component {
+  // We trigger an update of the autocomplete if the props changed.
   componentWillReceiveProps(nextProps) {
     this.props.onProps(nextProps);
   }

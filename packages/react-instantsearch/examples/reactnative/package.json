@@ -8,7 +8,7 @@
 	"dependencies": {
 		"react": "15.4.1",
 		"react-native": "0.39.2",
-		"react-instantsearch": "file:../../dist"
+		"react-instantsearch": "file:../../src"
 	},
 	"devDependencies": {
 		"babel-preset-react-native": "1.9.0"
