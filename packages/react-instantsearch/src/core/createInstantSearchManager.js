@@ -116,6 +116,46 @@ export default function createInstantSearchManager({
     search();
   }
 
+  function onSearchForFacetValues(nextSearchState) {
+    const baseSP = new SearchParameters({
+      ...searchParameters,
+      index: indexName,
+      ...highlightTags,
+    });
+    const widgetSearchParameters = getSearchParameters(baseSP);
+    const searchForFacetValuesHelper = algoliasearchHelper(algoliaClient, indexName, widgetSearchParameters);
+    store.setState({
+      ...store.getState(),
+      searchingForFacetValues: true,
+    });
+    searchForFacetValuesHelper.searchForFacetValues(nextSearchState.facetName, nextSearchState.query)
+      .then(content => {
+        store.setState({
+          ...store.getState(),
+          resultsFacetValues: {
+            ...store.getState().resultsFacetValues,
+            [nextSearchState.facetName]: content.facetHits,
+          },
+          searchingForFacetValues: false,
+        });
+      }, error => {
+        store.setState({
+          ...store.getState(),
+          error,
+          searchingForFacetValues: false,
+        });
+      })
+      .catch(error => {
+        // Since setState is synchronous, any error that occurs in the render of a
+        // component will be swallowed by this promise.
+        // This is a trick to make the error show up correctly in the console.
+        // See http://stackoverflow.com/a/30741722/969302
+        setTimeout(() => {
+          throw error;
+        });
+      });
+  }
+
   function getWidgetsIds() {
     return store.getState().metadata.reduce((res, meta) =>
         typeof meta.id !== 'undefined' ? res.concat(meta.id) : res
@@ -128,5 +168,6 @@ export default function createInstantSearchManager({
     getWidgetsIds,
     onExternalStateUpdate,
     transitionState,
+    onSearchForFacetValues,
   };
 }

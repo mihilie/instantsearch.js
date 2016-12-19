@@ -77,7 +77,7 @@ export default createConnector({
     limitMax: 20,
   },
 
-  getProvidedProps(props, searchState, searchResults) {
+  getProvidedProps(props, searchState, searchResults, metadata, facetValuesResults) {
     const {results} = searchResults;
     const {attributeName, showMore, limitMin, limitMax} = props;
     const limit = showMore ? limitMax : limitMin;
@@ -100,9 +100,23 @@ export default createConnector({
         isRefined: v.isRefined,
       }));
 
+    let facetValues;
+    if (facetValuesResults) {
+      facetValues = facetValuesResults[attributeName]
+        .slice(0, limit).map(
+          v => ({
+            label: v.value,
+            value: getValue(v.value, props, searchState),
+            _highlightResult: {label: {value: v.highlighted}},
+            count: v.count,
+            isRefined: v.isRefined,
+          }));
+    }
+
     return {
       items,
       currentRefinement: getCurrentRefinement(props, searchState),
+      facetValues,
     };
   },
 
@@ -119,6 +133,10 @@ export default createConnector({
       // {foo: []} => ""
       [namespace]: {...searchState[namespace], [id]: nextRefinement.length > 0 ? nextRefinement : ''},
     };
+  },
+
+  searchForFacetValues(props, searchState, nextRefinement) {
+    return {facetName: props.attributeName, query: nextRefinement};
   },
 
   cleanUp(props, searchState) {
